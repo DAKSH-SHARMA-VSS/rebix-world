@@ -2,6 +2,7 @@ from flask import Flask,request , render_template ,jsonify
 import openai
 import os
 from dotenv import load_dotenv
+import wikipedia
 load_dotenv()
 openai.api_key=os.getenv("open_ai_apikey")
 
@@ -29,7 +30,10 @@ def ask_my_AI():
         return jsonify({"answer": reply})
     
     except Exception as e:
-        return jsonify( {"answer":"sorry mujhe ye nahi pata....."})
+        answer=wikipedia.summary(question)
+        return jsonify({"answer",answer})
+
+       
     
 if __name__=="__main__":
     port = int(os.environ.get("PORT", 5000))
