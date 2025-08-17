@@ -22,7 +22,7 @@ def ask_my_AI():
         return jsonify("first enter something...")
     try:
         responce=openai.ChatCompletion.create(
-            model="gpt-4o-mini",
+            model="gpt-4",
             messages=[{'role':'user','content': question}]
         )
         reply=responce["choices"][0]["message"]["content"]
