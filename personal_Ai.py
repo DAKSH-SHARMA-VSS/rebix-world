@@ -30,8 +30,13 @@ def ask_my_AI():
         return jsonify({"answer": reply})
     
     except Exception as e:
-        answer=wikipedia.summary(question)
-        return jsonify({"answer",answer})
+        
+        try:
+           answer = wikipedia.summary(question, sentences=2)
+           return jsonify({"answer": answer})
+        except Exception as wiki_error:
+            return jsonify({"answer": "Sorry, I could not find an answer."})
+
 
        
     
