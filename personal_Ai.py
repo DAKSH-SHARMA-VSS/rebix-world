@@ -1,11 +1,10 @@
 from flask import Flask,request , render_template ,jsonify
-import openai
+import google.generativeai as genai
 import os
 from dotenv import load_dotenv
-import wikipedia
 load_dotenv()
-openai.api_key=os.getenv("open_ai_apikey")
-
+API_KEY=os.getenv("API")
+genai.configure(api_key=API_KEY)
 app=Flask(__name__)
 
 @app.route("/")
@@ -21,24 +20,15 @@ def ask_my_AI():
     if not question.strip():
         return jsonify("first enter something...")
     try:
-        responce=openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{'role':'user','content': question}]
-        )
-        reply=responce["choices"][0]["message"]["content"]
-        print("answer",reply)
-        return jsonify({"answer": reply})
+        model=genai.GenerativeModel("gemini-2.0-flash")
+        chat=model.start_chat()
+        response=chat.send_message(question)
+        return jsonify({"answer": response.text})
     
     except Exception as e:
+        return jsonify({'answer':"sorry i could not find answer"})
         
-        try:
-           answer = wikipedia.summary(question, sentences=2)
-           return jsonify({"answer": answer})
-        except Exception as wiki_error:
-            return jsonify({"answer": "Sorry, I could not find an answer."})
-
-
-       
+  
     
 if __name__=="__main__":
     port = int(os.environ.get("PORT", 5000))

@@ -40,6 +40,7 @@
       line-height: 1.4;
       word-wrap: break-word;
       animation: fadeIn 0.4s ease-in;
+      white-space: pre-line; /* line breaks */
     }
 
     .user {
@@ -154,6 +155,24 @@
       if (typing) typing.remove();
     }
 
+    // GPT-style typewriter effect for bot messages
+    function typeWriterEffect(text, sender) {
+      const message = document.createElement("div");
+      message.classList.add("message", sender);
+      chatContainer.appendChild(message);
+
+      let i = 0;
+      function typing() {
+        if (i < text.length) {
+          message.innerHTML += text.charAt(i);
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+          i++;
+          setTimeout(typing, 30); // speed of typing (ms per char)
+        }
+      }
+      typing();
+    }
+
     async function sendMessage() {
       const text = userInput.value.trim();
       if (!text) return;
@@ -172,7 +191,7 @@
 
         const data = await res.json();
         removeTyping();
-        addMessage(data.answer, "bot");
+        typeWriterEffect(data.answer, "bot"); // <-- animated typing
       } catch (err) {
         removeTyping();
         addMessage("⚠️ Error: Failed to connect.", "bot");
