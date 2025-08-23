@@ -19,6 +19,10 @@ def ask_my_AI():
 
     if not question.strip():
         return jsonify("first enter something...")
+    if "who makes you" in question or "tumhe kisne bnaya" in question:
+        return jsonify({"answer":"mujhe DAKSH SHARMA ne banaya hai mai unka pehla AI hu"})
+    if "who made you" in question:
+        return jsonify({"answer":"Mr. DAKSH SHARMA created me ,i am the first AI made by DAKSH.."})
     try:
         model=genai.GenerativeModel("gemini-2.0-flash")
         chat=model.start_chat()
