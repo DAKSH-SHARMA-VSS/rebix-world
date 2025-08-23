@@ -198,6 +198,38 @@
       typing();
     }
 
+    // ✅ Auto-reply logic (multi-language who made you?)
+    function isMobile() {
+      return /Android|iPhone|iPad|iPod|IEMobile|Opera Mini|Mobi/i.test(navigator.userAgent);
+    }
+    function detectLang(text) {
+      const t = text.toLowerCase();
+      if (/kisne.*banaya|tumhe kisne banaya/.test(t)) return "hi";
+      if (/who.*(made|created|built).*you/.test(t)) return "en";
+      if (/quien.*(creo|hizo|creó)/.test(t)) return "es";
+      if (/qui.*(créé|fait)/.test(t)) return "fr";
+      if (/wer.*(gemacht|erschaffen)/.test(t)) return "de";
+      if (/من.*(صنعك|أنشأك|خلقك)/.test(t)) return "ar";
+      return (navigator.language || "en").slice(0,2);
+    }
+    function creatorReply(lang) {
+      const replies = {
+        en: "I was created by Mr. Daksh Sharma.",
+        hi: "मुझे श्री दक्ष शर्मा ने बनाया है।",
+        es: "Fui creado por el Sr. Daksh Sharma.",
+        fr: "J’ai été créé par M. Daksh Sharma.",
+        de: "Ich wurde von Herrn Daksh Sharma erstellt.",
+        ar: "تم إنشائي بواسطة السيد داكش شارما."
+      };
+      return replies[lang] || replies["en"];
+    }
+    function autoCreatorReplyIfNeeded(text) {
+      if (!isMobile()) return null;
+      const intentRegex = /(who made you|who created you|kisne banaya|creator|quien te creó|qui t.a créé|wer hat dich gemacht|من صنعك)/i;
+      if (!intentRegex.test(text)) return null;
+      return creatorReply(detectLang(text));
+    }
+
     async function sendMessage() {
       const text = userInput.value.trim();
       if (!text) return;
@@ -205,20 +237,25 @@
       addMessage(text, "user");
       userInput.value = "";
 
-      // ✅ Mobile view me ek baar msg bhejne ke baad box neeche shift ho jaye
+      // ✅ Mobile input box neeche shift after first msg
       if (window.innerWidth <= 768) {
         inputContainer.classList.add("active");
       }
 
-      addTyping();
+      // ✅ Special case: "who made you?" auto reply
+      const auto = autoCreatorReplyIfNeeded(text);
+      if (auto) {
+        typeWriterEffect(auto, "bot");
+        return;
+      }
 
+      addTyping();
       try {
         const res = await fetch("/ask", {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify({question: text})
         });
-
         const data = await res.json();
         removeTyping();
         typeWriterEffect(data.answer, "bot");
